@@ -41,7 +41,7 @@ void setup() {
 }
 
 void loop() {
-  //  compose();
+    compose();
   currentMillis = millis();
   //unsigned long total = smooth_sensor(cs_4_2.capacitiveSensor(30));
   unsigned long total = cs_4_2.capacitiveSensor(30);
@@ -50,28 +50,25 @@ void loop() {
   Serial.println(millis() - currentMillis);
   Serial.println("\t");
   Serial.println(total);
-  Serial.println(sinDuration);
-  Serial.println(sinAmp);
-  Serial.println(sinOffset);
 
 
 
-  if (total < 5000) {
-    ledState = INACTIVE;
-  } else if (total > 5000 && total < 25000) {
-    ledState = CLOSEPROXIMITY;
+  if (total < 9000) {
+    changeState(INACTIVE);
+  } else if (total > 9000 && total < 25000) {
+    changeState(CLOSEPROXIMITY);
   } else if (total > 25000 && total < 50000) {
-    ledState = TOUCH;
+    changeState(TOUCH);
   } else if (total > 50000) {
-    ledState = ANGRY;
+    changeState(ANGRY);
   }
-  delay(50);
+  delay(250);
 
-  int brightness = sinewave(sinDuration, sinAmp, sinOffset); // our main variable for setting the brightness of the LED
 
 }
 
 void compose() {
+  int brightness = sinewave(sinDuration, sinAmp, sinOffset); // our main variable for setting the brightness of the LED
 
   switch (ledState) {
 
@@ -79,28 +76,39 @@ void compose() {
       sinDuration = 1000;
       sinAmp = 15;
       sinOffset = 5;
+      Serial.println("INACTIVE");
+
       break;
 
     case CLOSEPROXIMITY:
       sinDuration = 750;
       sinAmp = 100;
       sinOffset = 5;
+      Serial.println("CLOSEPROXIMITY");
       break;
 
     case TOUCH:
       sinDuration = 500;
       sinAmp = 150;
       sinOffset = 5;
+      Serial.println("TOUCH");
+
       break;
 
     case ANGRY:
       sinDuration = 50;
       sinAmp = 255;
       sinOffset = 1;
+      Serial.println("ANGRY");
+
       break;
   }
 }
-
+void changeState(ledStates newState){
+    // call to change state, will keep track of time since last state
+    startMillis = millis();
+    ledState = newState;
+  }
 
 int smooth_sensor(int sensor_value) {
   total = total - readings[readIndex];
