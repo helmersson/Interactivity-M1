@@ -7,6 +7,10 @@ enum ledStates previousLedState = ledState;
 unsigned long startMillis;  //some global variables available anywhere in the program
 unsigned long currentMillis;
 
+//LED
+#define LED_PIN 9
+
+
 //controls the brightness sinwave
 int brightness ; // our main variable for setting the brightness of the LED
 int sinDuration ;
@@ -24,7 +28,9 @@ int sinewave(float duration, float amplitude, int offset) {
   return value;
 }
 
-
+//CAPACITIVE_SENSOR
+#define CAP_SENS_RECIEVER 2
+#define CAP_SENS_SEND 4
 CapacitiveSensor cs_4_2 = CapacitiveSensor(4, 2);
 
 //SMOOTHING
@@ -37,11 +43,11 @@ int average = 0;
 
 void setup() {
   Serial.begin(9600);
-  pinMode(9, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
-    compose();
+  compose();
   currentMillis = millis();
   //unsigned long total = smooth_sensor(cs_4_2.capacitiveSensor(30));
   unsigned long total = cs_4_2.capacitiveSensor(30);
@@ -64,7 +70,7 @@ void loop() {
   }
   delay(250);
 
-
+  analogWrite(LED_PIN, brightness);
 }
 
 void compose() {
@@ -78,6 +84,7 @@ void compose() {
       sinOffset = 5;
       Serial.println("INACTIVE");
 
+
       break;
 
     case CLOSEPROXIMITY:
@@ -85,6 +92,7 @@ void compose() {
       sinAmp = 100;
       sinOffset = 5;
       Serial.println("CLOSEPROXIMITY");
+
       break;
 
     case TOUCH:
@@ -92,6 +100,7 @@ void compose() {
       sinAmp = 150;
       sinOffset = 5;
       Serial.println("TOUCH");
+
 
       break;
 
@@ -101,14 +110,16 @@ void compose() {
       sinOffset = 1;
       Serial.println("ANGRY");
 
+
       break;
   }
+
 }
-void changeState(ledStates newState){
-    // call to change state, will keep track of time since last state
-    startMillis = millis();
-    ledState = newState;
-  }
+void changeState(ledStates newState) {
+  // call to change state, will keep track of time since last state
+  startMillis = millis();
+  ledState = newState;
+}
 
 int smooth_sensor(int sensor_value) {
   total = total - readings[readIndex];
@@ -122,6 +133,11 @@ int smooth_sensor(int sensor_value) {
 
   average = total / numReadings;
   return average;
+  
 }
 
-
+//void printer(); {
+//    Serial.println(millis() - currentMillis);
+//  Serial.println("\t");
+//  Serial.println(total);
+//}
